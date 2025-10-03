@@ -13,3 +13,15 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Server in ascolto sulla porta ${port}`);
 });
+
+
+// multer
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('Nessun file caricato.');
+  }
+  
+  // L'URL dell'immagine sarà accessibile come /imgs/nomefile.jpg
+  const imageUrl = `/imgs/${req.file.filename}`;
+  res.send(`File caricato con successo! URL: ${imageUrl}`);
+});
