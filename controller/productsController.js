@@ -7,11 +7,10 @@ const connection = require("../data/db");
 const index = (req, res) => {
   const sql = "SELECT * FROM products";
 
-  connection.query(sql, (err, results) => {
-    if (err)
-      return res.status(500).json({ error: "Fallita ricerca dei prodotti" });
-
-    res.send(results);
+  connection.query(sql, (err, result) => {
+    if (err) { return res.status(500).json({ error: "Fallita ricerca dei prodotti" }); }
+    const products = result.map(product => ({ ...product }))
+    res.json(products);
   });
 };
 
@@ -20,9 +19,10 @@ const show = (req, res) => {
 
   const sql = "SELECT * FROM products WHERE ID = ?";
   connection.query(sql, [id], (err, results) => {
-    if (err) return res.status(500).json({ error: "Query fallita" });
-    if (results.length === 0)
-      return res.status(404).json({ error: "Prodotto non trovato" });
+    if (err) { return res.status(500).json({ error: "Query fallita" }) };
+    if (results.length === 0) { return res.status(404).json({ error: "Prodotto non trovato" }) };
+    const product = results[0]
+    res.json(product)
   });
 };
 
@@ -37,7 +37,7 @@ const store = (req, res, next) => {
   const query =
     "INSERT INTO products (name, price, color, size, description) VALUES (?,?,?,?,?)";
 
-  connection.query(query, [name, price, description], (err, results) => {
+  connection.query(query, [name, price, description], (err, res) => {
     if (err) {
       return res
         .status(500)
