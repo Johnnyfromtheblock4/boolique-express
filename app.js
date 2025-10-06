@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const port = 3000;
 
 // Middleware per il parsing JSON (va messo prima delle rotte)
 
@@ -10,11 +9,12 @@ const connection = require("./data/db");
 const productRouter = require("./router/productsRouting");
 const errorsHandler = require("./middleware/errorsHandler.js");
 const notFound = require("./middleware/notFound.js");
+const upload = require("./multer.js");
 
 app.use(express.json());
 
 // Importa la route dei prodotti
-const productsRouting = require("./routes/productsRouting");
+const productsRouting = require("./router/productsRouting");
 
 // Rotta principale
 app.get("/", (req, res) => {
@@ -29,8 +29,8 @@ app.use("/products", productsRouting);
 app.use(errorsHandler);
 app.use(notFound);
 
-app.listen(port, () => {
-  console.log(`Server in ascolto su http://localhost:${port}`);
+app.listen(portEnv, () => {
+  console.log(`Server in ascolto su http://localhost:${portEnv}`);
 });
 
 // multer
