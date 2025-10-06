@@ -9,7 +9,7 @@ const productsController = require("../controller/productsController");
 router.get("/", productsController.index);
 
 // GET /products/:id - Ottieni un prodotto specifico
-router.get("/:id", productsController.show);
+router.get("/:param", productsController.show);
 
 // POST /products - Crea un nuovo prodotto
 router.post("/", productsController.store);

@@ -3,16 +3,19 @@ const express = require("express");
 const app = express();
 
 // Middleware per il parsing JSON (va messo prima delle rotte)
-
+const cors = require('cors')
+const path = require('path')
 const portEnv = process.env.PORT;
 const connection = require("./data/db");
 const productRouter = require("./router/productsRouting");
 const errorsHandler = require("./middleware/errorsHandler.js");
 const notFound = require("./middleware/notFound.js");
 const upload = require("./multer.js");
-
+const imagePath = require('./middleware/imagePathMiddleware.js')
+app.use(cors({ origin: process.env.FE_APP }))
+app.use('/imgs', express.static(path.join(__dirname, 'public/imgs')))
 app.use(express.json());
-
+app.use(imagePath)
 // Importa la route dei prodotti
 const productsRouting = require("./router/productsRouting");
 
