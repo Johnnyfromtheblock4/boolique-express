@@ -16,7 +16,7 @@ const portEnv = process.env.PORT || 3000;
 // Middleware globali
 app.use(cors({ origin: process.env.FE_APP }));
 app.use(express.json());
-app.use('/imgs', express.static(path.join(__dirname, 'public/imgs')));
+app.use('/imgs', express.static(path.join(__dirname, '/public/imgs')));
 app.use(imagePath);
 
 // Rotta principale

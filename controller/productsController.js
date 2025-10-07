@@ -2,9 +2,8 @@
 import connection from "../data/db.js";
 import slugify from "slugify";
 
-const IMAGE_BASE_PATH = "/imgs/"; // percorso pubblico delle immagini
+const IMAGE_BASE_PATH = "http://localhost:3000/imgs/";
 
-// LISTA PRODOTTI
 const index = (req, res) => {
   const { minId, maxId } = req.query;
 
