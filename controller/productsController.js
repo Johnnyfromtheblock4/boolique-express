@@ -9,7 +9,7 @@ const index = (req, res) => {
 
   let sql = `
     SELECT 
-      p.id, p.name, p.price, p.description,
+      p.id, p.name, p.price, p.description,p.slug,
       c.name AS category, b.name AS brand
     FROM products p
     LEFT JOIN category c ON p.category_id = c.id
