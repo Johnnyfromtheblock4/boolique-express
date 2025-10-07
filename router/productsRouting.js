@@ -7,6 +7,7 @@ const productsController = require("../controller/productsController");
 
 // GET /products - Elenco di tutti i prodotti
 router.get("/", productsController.index);
+// router.get("/", productsController.accessories);
 
 // GET /products/:id - Ottieni un prodotto specifico
 router.get("/:param", productsController.show);

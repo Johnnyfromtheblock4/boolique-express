@@ -7,7 +7,6 @@ const cors = require('cors')
 const path = require('path')
 const portEnv = process.env.PORT;
 const connection = require("./data/db");
-const productRouter = require("./router/productsRouting");
 const errorsHandler = require("./middleware/errorsHandler.js");
 const notFound = require("./middleware/notFound.js");
 const upload = require("./multer.js");
