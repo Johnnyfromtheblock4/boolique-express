@@ -15,10 +15,10 @@ router.get("/:param", productsController.show);
 router.post("/", upload.array("image_url", 10), productsController.store);
 
 // PUT /products/:id - Aggiorna un prodotto completamente
-router.put("/:id", upload.array("files", 10), productsController.update);
+router.put("/:id", upload.array("image_url", 10), productsController.update);
 
 // PATCH /products/:id - Aggiorna solo i campi forniti
-router.patch("/:id", upload.array("files", 10), productsController.patch);
+router.patch("/:id", upload.array("image_url", 10), productsController.patch);
 // DELETE /products/:id - Elimina un prodotto
 router.delete("/:id", productsController.destroy);
 

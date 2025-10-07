@@ -162,11 +162,37 @@ const store = (req, res) => {
 // DELETE PRODOTTO
 const destroy = (req, res) => {
   const { id } = req.params;
-  connection.query("DELETE FROM products WHERE id=?", [id], err => {
-    if (err) return res.status(500).json({ error: "Errore nel cancellare il prodotto" });
-    res.sendStatus(204);
+  const isNumeric = !isNaN(id);
+
+  // Determina la query per trovare l'ID effettivo del prodotto
+  const findProductQuery = isNumeric
+    ? "SELECT id FROM products WHERE id = ?"
+    : "SELECT id FROM products WHERE slug = ?";
+
+  connection.query(findProductQuery, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: "Errore ricerca prodotto: " + err });
+    if (results.length === 0) return res.status(404).json({ error: "Prodotto non trovato" });
+
+    const productId = results[0].id;
+
+    // 1️⃣ Elimina prima tutte le immagini collegate
+    connection.query("DELETE FROM products_image WHERE product_id = ?", [productId], (err2) => {
+      if (err2) return res.status(500).json({ error: "Errore eliminazione immagini: " + err2 });
+
+      // 2️⃣ Poi elimina il prodotto stesso
+      connection.query("DELETE FROM products WHERE id = ?", [productId], (err3, result) => {
+        if (err3) return res.status(500).json({ error: "Errore nel cancellare il prodotto: " + err3 });
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "Prodotto non trovato" });
+        }
+
+        res.status(200).json({ result: true, message: "Prodotto e immagini eliminati con successo" });
+      });
+    });
   });
 };
+
 
 // UPDATE PRODOTTO (PUT)
 const update = (req, res) => {
@@ -206,7 +232,11 @@ const update = (req, res) => {
     findOrCreateCategory((err2, categoryId) => {
       if (err2) return res.status(500).json({ error: "Errore categoria: " + err2 });
 
-      const q = `UPDATE products SET name=?, price=?, color=?, sales=?, gender=?, size=?, description=?, slug=?, brand_id=?, category_id=? WHERE id=?`;
+      const q = `
+        UPDATE products 
+        SET name=?, price=?, color=?, sales=?, gender=?, size=?, description=?, slug=?, brand_id=?, category_id=? 
+        WHERE id=?
+      `;
       const values = [name, price, color, sales, gender, size, description, slug, brandId, categoryId, id];
 
       connection.query(q, values, (err3) => {
@@ -232,6 +262,7 @@ const update = (req, res) => {
     });
   });
 };
+
 
 const patch = (req, res) => {
   const { id } = req.params;
