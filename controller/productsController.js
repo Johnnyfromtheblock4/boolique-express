@@ -126,10 +126,10 @@ const store = (req, res) => {
     }
 
     const findOrCreateBrand = (cb) => {
-      connection.query("SELECT id FROM brands WHERE name=?", [brand], (err, results) => {
+      connection.query("SELECT id FROM brand WHERE name=?", [brand], (err, results) => {
         if (err) return cb(err);
         if (results.length > 0) return cb(null, results[0].id);
-        connection.query("INSERT INTO brands (name) VALUES (?)", [brand], (err2, res2) => {
+        connection.query("INSERT INTO brand (name) VALUES (?)", [brand], (err2, res2) => {
           if (err2) return cb(err2);
           cb(null, res2.insertId);
         });
@@ -137,10 +137,10 @@ const store = (req, res) => {
     };
 
     const findOrCreateCategory = (cb) => {
-      connection.query("SELECT id FROM categories WHERE name=?", [category], (err, results) => {
+      connection.query("SELECT id FROM category WHERE name=?", [category], (err, results) => {
         if (err) return cb(err);
         if (results.length > 0) return cb(null, results[0].id);
-        connection.query("INSERT INTO categories (name) VALUES (?)", [category], (err2, res2) => {
+        connection.query("INSERT INTO category (name) VALUES (?)", [category], (err2, res2) => {
           if (err2) return cb(err2);
           cb(null, res2.insertId);
         });
@@ -203,10 +203,10 @@ const update = (req, res) => {
   const slug = slugify(name, { lower: true, strict: true });
 
   const findOrCreateBrand = (cb) => {
-    connection.query("SELECT id FROM brands WHERE name=?", [brand], (err, results) => {
+    connection.query("SELECT id FROM brand WHERE name=?", [brand], (err, results) => {
       if (err) return cb(err);
       if (results.length > 0) return cb(null, results[0].id);
-      connection.query("INSERT INTO brands (name) VALUES (?)", [brand], (err2, res2) => {
+      connection.query("INSERT INTO brand (name) VALUES (?)", [brand], (err2, res2) => {
         if (err2) return cb(err2);
         cb(null, res2.insertId);
       });
@@ -214,10 +214,10 @@ const update = (req, res) => {
   };
 
   const findOrCreateCategory = (cb) => {
-    connection.query("SELECT id FROM categories WHERE name=?", [category], (err, results) => {
+    connection.query("SELECT id FROM category WHERE name=?", [category], (err, results) => {
       if (err) return cb(err);
       if (results.length > 0) return cb(null, results[0].id);
-      connection.query("INSERT INTO categories (name) VALUES (?)", [category], (err2, res2) => {
+      connection.query("INSERT INTO category (name) VALUES (?)", [category], (err2, res2) => {
         if (err2) return cb(err2);
         cb(null, res2.insertId);
       });
@@ -286,22 +286,22 @@ const patch = (req, res) => {
 
   // gestione brand/categoria opzionali
   if (fields.brand) {
-    connection.query("SELECT id FROM brands WHERE name=?", [fields.brand], (err, results) => {
+    connection.query("SELECT id FROM brand WHERE name=?", [fields.brand], (err, results) => {
       if (err) return res.status(500).json({ error: err });
       if (results.length > 0) { updates.push("brand_id=?"); values.push(results[0].id); finalizeUpdate(); }
       else {
-        connection.query("INSERT INTO brands (name) VALUES (?)", [fields.brand], (err2, res2) => {
+        connection.query("INSERT INTO brand (name) VALUES (?)", [fields.brand], (err2, res2) => {
           if (err2) return res.status(500).json({ error: err2 });
           updates.push("brand_id=?"); values.push(res2.insertId); finalizeUpdate();
         });
       }
     });
   } else if (fields.category) {
-    connection.query("SELECT id FROM categories WHERE name=?", [fields.category], (err, results) => {
+    connection.query("SELECT id FROM category WHERE name=?", [fields.category], (err, results) => {
       if (err) return res.status(500).json({ error: err });
       if (results.length > 0) { updates.push("category_id=?"); values.push(results[0].id); finalizeUpdate(); }
       else {
-        connection.query("INSERT INTO categories (name) VALUES (?)", [fields.category], (err2, res2) => {
+        connection.query("INSERT INTO category (name) VALUES (?)", [fields.category], (err2, res2) => {
           if (err2) return res.status(500).json({ error: err2 });
           updates.push("category_id=?"); values.push(res2.insertId); finalizeUpdate();
         });
