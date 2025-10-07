@@ -5,7 +5,9 @@
 const connection = require("../data/db");
 
 const index = (req, res) => {
-  const sql = `
+  const { minId, maxId } = req.query;
+
+  let sql = `
     SELECT 
       p.id, p.name, p.price, p.description,
       c.name AS category, b.name AS brand
@@ -14,7 +16,14 @@ const index = (req, res) => {
     LEFT JOIN brand b ON p.brand_id = b.id
   `;
 
-  connection.query(sql, (err, products) => {
+  const params = [];
+
+  if (minId && maxId) {
+    sql += " WHERE p.id BETWEEN ? AND ?";
+    params.push(Number(minId), Number(maxId));
+  }
+
+  connection.query(sql, params, (err, products) => {
     if (err) return res.status(500).json({ error: "Fallita ricerca dei prodotti" });
     if (products.length === 0) return res.json([]);
 
@@ -48,6 +57,7 @@ const index = (req, res) => {
     });
   });
 };
+
 
 const show = (req, res) => {
   const { param } = req.params;
