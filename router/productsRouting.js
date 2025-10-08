@@ -11,6 +11,8 @@ router.get("/", productsController.index);
 // GET /products/:param - Ottieni un prodotto specifico (id o slug)
 router.get("/:param", productsController.show);
 
+router.get("/:id/related", productsController.related);
+
 // POST /products - Crea un nuovo prodotto
 router.post("/", upload.array("image_url", 10), productsController.store);
 
