@@ -172,7 +172,6 @@ const related = (req, res) => {
   });
 };
 
-// CREA PRODOTTO (POST)
 const store = (req, res) => {
   console.log("BODY:", req.body);
   console.log("FILES:", req.files);
@@ -188,62 +187,82 @@ const store = (req, res) => {
     brand,
     category,
   } = req.body;
+
+  
   if (!name || !price || !brand || !category) {
     return res.status(400).json({ error: "Dati obbligatori mancanti" });
   }
 
-  const slug = slugify(name, { lower: true, strict: true });
+ 
+  if (name.trim().length === 0) {
+    return res.status(400).json({ error: "Il nome del prodotto non può essere vuoto" });
+  }
 
-  const findOrCreateBrand = (cb) => {
+  
+  const numericPrice = parseFloat(price);
+  if (isNaN(numericPrice) || numericPrice <= 0) {
+    return res.status(400).json({ error: "Il prezzo deve essere un numero positivo" });
+  }
+
+
+  const timestamp = Date.now(); // es: 1739213981273
+  const baseSlug = slugify(name, { lower: true, strict: true });
+  const slug = `${baseSlug}-${timestamp}`;
+
+
+  const findBrand = (cb) => {
     connection.query(
-      "SELECT id FROM brand WHERE name=?",
+      "SELECT id FROM brand WHERE name = ?",
       [brand],
       (err, results) => {
         if (err) return cb(err);
-        if (results.length > 0) return cb(null, results[0].id);
-        connection.query(
-          "INSERT INTO brand (name) VALUES (?)",
-          [brand],
-          (err2, res2) => {
-            if (err2) return cb(err2);
-            cb(null, res2.insertId);
-          }
-        );
+        if (results.length === 0) {
+          return cb(new Error("Il brand specificato non esiste"));
+        }
+        cb(null, results[0].id);
       }
     );
   };
 
-  const findOrCreateCategory = (cb) => {
+  
+  const findCategory = (cb) => {
     connection.query(
-      "SELECT id FROM category WHERE name=?",
+      "SELECT id FROM category WHERE name = ?",
       [category],
       (err, results) => {
         if (err) return cb(err);
-        if (results.length > 0) return cb(null, results[0].id);
-        connection.query(
-          "INSERT INTO category (name) VALUES (?)",
-          [category],
-          (err2, res2) => {
-            if (err2) return cb(err2);
-            cb(null, res2.insertId);
-          }
-        );
+        if (results.length === 0) {
+          return cb(new Error("La categoria specificata non esiste"));
+        }
+        cb(null, results[0].id);
       }
     );
   };
 
-  findOrCreateBrand((err, brandId) => {
-    if (err) return res.status(500).json({ error: "Errore brand: " + err });
-    findOrCreateCategory((err2, categoryId) => {
-      if (err2)
-        return res.status(500).json({ error: "Errore categoria: " + err2 });
+ 
+  findBrand((err, brandId) => {
+    if (err) {
+      console.error("Errore brand:", err.message);
+      return res.status(400).json({ error: err.message });
+    }
 
-      const q = `INSERT INTO products (name, price, color, sales , gender, size, description, slug, brand_id, category_id) VALUES (?, ?, ?,?, ?, ?, ?, ?, ?, ?)`;
+    findCategory((err2, categoryId) => {
+      if (err2) {
+        console.error("Errore categoria:", err2.message);
+        return res.status(400).json({ error: err2.message });
+      }
+
+      const q = `
+        INSERT INTO products 
+        (name, price, color, sales, gender, size, description, slug, brand_id, category_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
       connection.query(
         q,
         [
-          name,
-          price,
+          name.trim(),
+          numericPrice,
           color,
           sales,
           gender,
@@ -254,23 +273,32 @@ const store = (req, res) => {
           categoryId,
         ],
         (err3, resProd) => {
-          if (err3)
-            return res.status(500).json({ error: "Errore prodotto: " + err3 });
+          if (err3) {
+            console.error("Errore inserimento prodotto:", err3);
+            return res.status(500).json({ error: "Errore inserimento prodotto" });
+          }
 
           const productId = resProd.insertId;
 
+          
           if (req.files && req.files.length > 0) {
-            const imgQuery = `INSERT INTO products_image (product_id, image_url, sort_order) VALUES ?`;
+            const imgQuery = `
+              INSERT INTO products_image (product_id, image_url, sort_order) 
+              VALUES ?
+            `;
             const values = req.files.map((file, index) => [
               productId,
               file.filename,
               index,
             ]);
+
             connection.query(imgQuery, [values], (err4) => {
-              if (err4)
+              if (err4) {
+                console.error("Errore inserimento immagini:", err4);
                 return res
                   .status(500)
-                  .json({ error: "Errore inserimento immagini: " + err4 });
+                  .json({ error: "Errore inserimento immagini" });
+              }
               return res.status(201).json({
                 result: true,
                 message: "Prodotto e immagini salvati",
@@ -292,6 +320,8 @@ const store = (req, res) => {
   });
 };
 
+
+
 // DELETE PRODOTTO
 const destroy = (req, res) => {
   const { id } = req.params;
@@ -310,7 +340,7 @@ const destroy = (req, res) => {
 
     const productId = results[0].id;
 
-    // 1️⃣ Elimina prima tutte le immagini collegate
+   
     connection.query(
       "DELETE FROM products_image WHERE product_id = ?",
       [productId],
@@ -320,7 +350,7 @@ const destroy = (req, res) => {
             .status(500)
             .json({ error: "Errore eliminazione immagini: " + err2 });
 
-        // 2️⃣ Poi elimina il prodotto stesso
+        
         connection.query(
           "DELETE FROM products WHERE id = ?",
           [productId],
