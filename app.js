@@ -7,6 +7,7 @@ const errorsHandler = require("./middleware/errorsHandler.js");
 const notFound = require("./middleware/notFound.js");
 const upload = require("./multer.js");
 const imagePath = require('./middleware/imagePathMiddleware.js');
+const orderRouting = require("./router/orderRouting");
 
 const productsRouting = require("./router/productsRouting");
 
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 
 // Rotte prodotti
 app.use("/products", productsRouting);
+app.use("/orders", orderRouting);
 
 // Rotta upload immagini standalone
 app.post("/upload", upload.array("files", 10), (req, res) => {
