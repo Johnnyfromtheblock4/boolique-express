@@ -9,6 +9,7 @@ const upload = require("./multer.js");
 const imagePath = require('./middleware/imagePathMiddleware.js');
 const orderRouting = require("./router/orderRouting");
 
+const discountRoutes = require("./router/discountRouting");
 const productsRouting = require("./router/productsRouting");
 
 const app = express();
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 // Rotte prodotti
 app.use("/products", productsRouting);
 app.use("/orders", orderRouting);
+app.use("/discount", discountRoutes);
 
 // Rotta upload immagini standalone
 app.post("/upload", upload.array("files", 10), (req, res) => {
